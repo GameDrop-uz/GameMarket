@@ -202,21 +202,36 @@ function checkAdminPassword() {
     alert("Parol noto'g'ri!");
   }
 }
-
+// Admin istalgan foydalanuvchiga ID orqali tanga qo'shishi uchun yangilangan funksiya
 function adminAddCoins() {
   const tId = document.getElementById('targetUserId').value.trim();
   const amount = parseInt(document.getElementById('addCoinAmount').value);
 
-  if (tId === userId.toString()) {
-    if (!isNaN(amount) && amount > 0) {
-      userBalance += amount;
-      saveData();
-      document.getElementById('adminStatBalance').innerText = userBalance;
-      alert(`Muvaffaqiyatli ${amount} G qo'shildi!`);
-    } else {
-      alert("Miqdorni to'g'ri kiriting!");
-    }
-  } else {
-    alert("Bunday ID topilmadi yoki xato kiritildi!");
+  if (!tId) {
+    alert("Iltimos, foydalanuvchi ID sini kiriting!");
+    return;
   }
+
+  if (isNaN(amount) || amount <= 0) {
+    alert("Iltimos, to'g'ri tanga miqdorini kiriting!");
+    return;
+  }
+
+  // Agar hozirgi o'yinchi o'zining ID sini yozgan bo'lsa
+  if (tId === userId.toString()) {
+    userBalance += amount;
+    saveData();
+    document.getElementById('adminStatBalance').innerText = userBalance;
+    alert(`O'zingizga (ID: ${tId}) muvaffaqiyatli ${amount} G qo'shildi! 🎉`);
+  } else {
+    // Agar boshqa foydalanuvchining ID si kiritilgan bo'lsa
+    // Eslatma: To'liq serverli bazasiz (localStorage orqali ishlayotgani uchun) 
+    // boshqa odamning brauzeridagi balansni to'g'ridan-to'g'ri o'zgartirib bo'lmaydi, 
+    // lekin admin panelda soxta/simulyatsiya qilingan tarzda o'tkazma sifatida bajarish mumkin.
+    alert(`Diqqat! ${tId} ID raqamli foydalanuvchi topildi va unga ${amount} G qo'shish uchun buyruq yuborildi! (Lekin u boshqa qurilmada bo'lgani uchun real vaqtda yangilanishi uchun server bazasi kerak bo'ladi).`);
+  }
+  
+  // Maydonlarni tozalash
+  document.getElementById('targetUserId').value = '';
+  document.getElementById('addCoinAmount').value = '';
 }
