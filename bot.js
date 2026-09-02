@@ -11,7 +11,7 @@ bot.start((ctx) => {
                 [
                     { 
                         text: "🚀 Game Market'ni Ochish", 
-                        web_app: { url: "SIZNING_SAYTINGIZ_LINKI" } // Masalan: Vercel yoki Netlify'dagi link
+                        web_app: { url: "6a9847f1c935dec5299ee92f" } // Masalan: Vercel yoki Netlify'dagi link
                     }
                 ]
             ]
