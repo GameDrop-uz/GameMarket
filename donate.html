@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donat va Xizmatlar - Game Market</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #ffffff; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background-color: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin: 0 auto 24px auto; max-width: 700px; }
+        .logo { font-size: 20px; font-weight: bold; color: #38bdf8; letter-spacing: 1px; }
+        .user-info { text-align: right; font-size: 14px; color: #94a3b8; }
+        .user-info span { color: #ffffff; font-weight: bold; }
+        
+        .container { max-width: 700px; margin: 0 auto; background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 30px; margin-bottom: 30px; }
+        h3 { color: #38bdf8; margin-bottom: 15px; }
+        label { color: #94a3b8; font-size: 14px; display: block; margin-bottom: 8px; margin-top: 15px; }
+        
+        .input-group { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; font-size: 15px; margin-bottom: 15px; }
+        
+        .grid-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .option-card { background: #0f172a; border: 2px solid #334155; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .option-card.active { border-color: #38bdf8; background: #0c4a6e; }
+        .option-card h4 { color: #fff; font-size: 15px; }
+        .option-card p { color: #94a3b8; font-size: 12px; margin-top: 5px; }
+
+        .packages-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        
+        .btn-main { width: 100%; padding: 14px; background-color: #f59e0b; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.3s; margin-top: 20px; }
+        .btn-main:hover { background-color: #d97706; }
+        .btn-back { display: block; text-align: center; margin-top: 15px; color: #94a3b8; text-decoration: none; font-size: 14px; }
+        .btn-back:hover { color: #38bdf8; }
+
+        .coming-soon-section { max-width: 700px; margin: 0 auto; background-color: #1e293b; border: 1px dashed #475569; border-radius: 16px; padding: 25px; }
+        .coming-soon-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+        .coming-card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 15px; text-align: center; opacity: 0.7; }
+        .coming-card h4 { color: #e2e8f0; font-size: 14px; }
+        .badge-soon { background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 6px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">💎 DONAT & XIZMATLAR</div>
+        <div class="user-info">
+            Balans: <span id="display-balance">Yuklanmoqda...</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>1. O'yinni tanlang</h3>
+        <div class="grid-options" id="gameGrid">
+            <div class="option-card" onclick="selectGame('PUBG Mobile', 'UC')">
+                <h4>PUBG Mobile</h4>
+                <p>UC</p>
+            </div>
+            <div class="option-card" onclick="selectGame('Free Fire', 'Olmos')">
+                <h4>Free Fire</h4>
+                <p>Olmos</p>
+            </div>
+            <div class="option-card" onclick="selectGame('Mobile Legends', 'Olmos')">
+                <h4>Mobile Legends</h4>
+                <p>Olmos</p>
+            </div>
+        </div>
+
+        <label>2. O'yin ID raqamingizni kiriting:</label>
+        <input type="text" id="playerId" class="input-group" placeholder="Masalan: 5123456789">
+
+        <h3 style="margin-top: 20px;">3. Paketni tanlang</h3>
+        <div class="packages-grid" id="packageGrid">
+            <p style="color: #64748b; font-size: 14px;">Avval o'yinni tanlang...</p>
+        </div>
+
+        <button class="btn-main" onclick="buyDonat()">Sotib olish</button>
+        <a href="index.html" class="btn-back">⬅ Ortga qaytish</a>
+    </div>
+
+    <div class="coming-soon-section">
+        <h3 style="color: #cbd5e1;">🚀 Tez kunda qo'shiladigan xizmatlar</h3>
+        <div class="coming-soon-grid">
+            <div class="coming-card">
+                <h4>Standoff 2 (Gold)</h4>
+                <span class="badge-soon">Tez kunda</span>
+            </div>
+            <div class="coming-card">
+                <h4>Steam Balans</h4>
+                <span class="badge-soon">Tez kunda</span>
+            </div>
+            <div class="coming-card">
+                <h4>Telegram Stars</h4>
+                <span class="badge-soon">Tez kunda</span>
+            </div>
+            <div class="coming-card">
+                <h4>Telegram Premium</h4>
+                <span class="badge-soon">Tez kunda</span>
+            </div>
+            <div class="coming-card" style="grid-column: span 2;">
+                <h4>AI Xizmatlari (ChatGPT va boshqalar)</h4>
+                <span class="badge-soon">Tez kunda</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let selectedGame = "";
+        let currencyName = "";
+        let selectedPackage = null;
+
+        const packages = {
+            'PUBG Mobile': [
+                { amount: 60, price: 13000 },
+                { amount: 120, price: 26000 },
+                { amount: 325, price: 70000 },
+                { amount: 660, price: 140000 },
+                { amount: 1800, price: 300000 }
+            ],
+            'Free Fire': [
+                { amount: 100, price: 13000 },
+                { amount: 200, price: 26000 },
+                { amount: 310, price: 39000 },
+                { amount: 520, price: 65000 },
+                { amount: 1060, price: 130000 }
+            ],
+            'Mobile Legends': [
+                { amount: 86, price: 14000 },
+                { amount: 172, price: 28000 },
+                { amount: 257, price: 41000 },
+                { amount: 706, price: 112000 }
+            ]
+        };
+
+        window.onload = function() {
+            if (!currentUser) {
+                alert("Tizimga kirmagansiz!");
+                window.location.href = "index.html";
+                return;
+            }
+            document.getElementById('display-balance').innerText = currentUser.balance.toLocaleString() + " so'm";
+        };
+
+        function selectGame(game, currency) {
+            selectedGame = game;
+            currencyName = currency;
+            selectedPackage = null;
+            
+            document.querySelectorAll('#gameGrid .option-card').forEach(card => {
+                card.classList.remove('active');
+                if(card.innerText.includes(game)) card.classList.add('active');
+            });
+
+            let grid = document.getElementById('packageGrid');
+            grid.innerHTML = "";
+            packages[game].forEach((pkg) => {
+                let div = document.createElement('div');
+                div.className = "option-card";
+                div.innerHTML = `<h4>${pkg.amount} ${currency}</h4><p>${pkg.price.toLocaleString()} so'm</p>`;
+                div.onclick = () => selectPackage(pkg, div);
+                grid.appendChild(div);
+            });
+        }
+
+        function selectPackage(pkg, element) {
+            selectedPackage = pkg;
+            document.querySelectorAll('#packageGrid .option-card').forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function buyDonat() {
+            let playerId = document.getElementById('playerId').value.trim();
+
+            if (!selectedGame) return alert("Iltimos, o'yinni tanlang!");
+            if (!playerId) return alert("O'yin ID raqamini kiriting!");
+            if (!selectedPackage) return alert("Paketni tanlang!");
+
+            if (currentUser.balance < selectedPackage.price) {
+                return alert("Balansingizda mablag' yetarli emas!");
+            }
+
+            if (confirm(`Rostdan ham ${selectedPackage.amount} ${currencyName} ni ${selectedPackage.price.toLocaleString()} so'mga sotib olmoqchimisiz?`)) {
+                
+                currentUser.balance -= selectedPackage.price;
+                
+                let users = JSON.parse(localStorage.getItem('allUsers')) || [];
+                users = users.map(u => u.email === currentUser.email ? currentUser : u);
+                localStorage.setItem('allUsers', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('display-balance').innerText = currentUser.balance.toLocaleString() + " so'm";
+
+                let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+                let orderText = `🚨 YANGI DONAT BUYURTMASI!\nO'yin: ${selectedGame}\nID: ${playerId}\nMiqdor: ${selectedPackage.amount} ${currencyName}\nTo'landi: ${selectedPackage.price.toLocaleString()} so'm.`;
+                
+                messages.push({
+                    sender: currentUser.id,
+                    receiver: "0712",
+                    text: orderText,
+                    type: 'text',
+                    time: new Date().toLocaleTimeString()
+                });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+                alert("Buyurtma qabul qilindi! Owner tez orada hisobingizga tashlab beradi.");
+                window.location.href = "index.html";
+            }
+        }
+    </script>
+</body>
+</html>

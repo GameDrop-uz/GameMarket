@@ -1,0 +1,42 @@
+/* Universal Responsive Design (Telefon, Planshet, Desktop va TV) */
+:root {
+    --container-max: 1440px;
+}
+
+/* Asosiy ekran moslashuvi */
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Mobil telefonlar uchun (0px - 480px) */
+@media (max-width: 480px) {
+    body { padding: 10px !important; font-size: 13px; }
+    .market-header { flex-direction: column; align-items: stretch; gap: 8px; padding: 10px; }
+    .search-bar { width: 100% !important; max-width: 100% !important; }
+    .listings-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+    .listing-img-box { height: 110px !important; }
+    .owner-form-box, .modal-container { padding: 15px !important; margin: 10px; }
+}
+
+/* Planshetlar uchun (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    body { padding: 15px; }
+    .listings-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+}
+
+/* Desktop va noutbuklar uchun (769px - 1200px) */
+@media (min-width: 769px) and (max-width: 1200px) {
+    body { max-width: 1100px; padding: 20px; }
+    .listings-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+
+/* Katta ekranlar va Televizorlar uchun (1201px va undan yuqori) */
+@media (min-width: 1201px) {
+    body { max-width: var(--container-max); padding: 30px; font-size: 16px; }
+    .listings-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .listing-img-box { height: 170px; }
+    .modal-container { max-width: 650px; }
+}

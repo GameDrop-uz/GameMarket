@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Market - Tizim</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #ffffff; padding: 20px; padding-bottom: 90px; }
+        .container { max-width: 400px; margin: 80px auto; background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 30px; text-align: center; }
+        .container h2 { color: #38bdf8; margin-bottom: 8px; }
+        .container p { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+        .input-group { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; margin-bottom: 15px; font-size: 15px; }
+        .btn-main { width: 100%; padding: 12px; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+        .btn-main:hover { background-color: #0ea5e9; }
+        #app-content { display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; background-color: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 24px; }
+        .logo { font-size: 20px; font-weight: bold; color: #38bdf8; letter-spacing: 1px; }
+        .user-info { text-align: right; font-size: 14px; color: #94a3b8; }
+        .user-info span { color: #ffffff; font-weight: bold; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; text-align: center; transition: transform 0.3s, border-color 0.3s; }
+        .card h3 { margin-bottom: 12px; color: #38bdf8; }
+        .card p { font-size: 14px; color: #94a3b8; margin-bottom: 16px; }
+        .profile-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+        .profile-body p { font-size: 15px; color: #94a3b8; margin-bottom: 10px; }
+        .profile-body span { color: #ffffff; font-weight: bold; }
+        .btn-custom-card { margin-top: 15px; width: 100%; padding: 12px; background-color: #f59e0b; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Chat tuzilmasi */
+        .chat-layout { display: flex; background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; overflow: hidden; height: 500px; max-width: 850px; margin: 0 auto; }
+        .chat-sidebar { width: 260px; border-right: 1px solid #334155; background: #0f172a; overflow-y: auto; }
+        .chat-sidebar-title { padding: 15px; font-weight: bold; color: #38bdf8; border-bottom: 1px solid #334155; font-size: 14px; }
+        .user-list-item { padding: 12px 15px; border-bottom: 1px solid #1e293b; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .user-list-item:hover, .user-list-item.active { background: #1e293b; }
+        .chat-main-area { flex: 1; display: flex; flex-direction: column; background: #1e293b; }
+        .chat-header-panel { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #1e293b; border-bottom: 1px solid #334155; flex-wrap: wrap; gap: 8px; }
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
+        .msg { padding: 10px; border-radius: 8px; max-width: 80%; font-size: 14px; word-break: break-all; }
+        .msg.sent { background: #38bdf8; color: #0f172a; align-self: flex-end; }
+        .msg.received { background: #334155; color: #fff; align-self: flex-start; }
+        .msg img { max-width: 150px; border-radius: 6px; display: block; margin-top: 5px; cursor: pointer; }
+        .chat-input-area { display: flex; padding: 10px; gap: 10px; background: #1e293b; border-top: 1px solid #334155; align-items: center; }
+        .chat-input-area input[type="text"] { flex: 1; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; }
+        .chat-input-area button { padding: 10px 16px; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .photo-btn-panel { padding: 8px 15px; background: #0f172a; border-top: 1px solid #334155; text-align: center; display: none; }
+        .btn-send-photo { background: #f59e0b; color: #0f172a; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; width: 100%; }
+
+        #cardModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: #1e293b; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #334155; }
+        .modal-input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px; margin-bottom: 15px; font-size: 16px; }
+        
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-around; padding: 14px 0; display: none; z-index: 50; }
+        .nav-item { color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .nav-item.active { color: #38bdf8; }
+    </style>
+</head>
+<link rel="stylesheet" href="plus.css">
+<body>
+
+    <div id="auth-container" class="container">
+        <h2>Game Market</h2>
+        <p>Email va parolingizni kiriting (Bepul random karta beriladi)</p>
+        <form onsubmit="handleLogin(event)">
+            <input type="email" id="loginEmail" class="input-group" placeholder="Email kiriting" required>
+            <input type="password" id="loginPassword" class="input-group" placeholder="Parol kiriting" required>
+            <button type="submit" class="btn-main">Kirish</button>
+        </form>
+    </div>
+
+    <div id="app-content">
+        <div class="header">
+            <div class="logo" id="market-logo">GAME MARKET</div>
+            <div class="user-info">
+                ID: <span id="display-id">Yuklanmoqda...</span><br>
+                Balans: <span id="display-balance">0 so'm</span>
+            </div>
+        </div>
+
+        <div id="section-home" class="page-section active">
+            <div class="grid-menu">
+               <div class="card">
+    <h3>🛒 Akkaunt Sotib Olish</h3>
+    <p>Tayyor va xavfsiz o'yin akkauntlarini tanlang.</p>
+    <a href="function.html" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: #38bdf8; color: #0f172a; text-decoration: none; font-weight: bold; border-radius: 8px;">🛡️ Garant Bozoriga O'tish</a>
+</div>
+                <div class="card">
+                    <h3>➕ Akkaunt Sotish</h3>
+                    <p>O'yin akkauntingizni sotish uchun Ownerga yozing.</p>
+                    <button onclick="switchTab('chat')" style="padding:10px 20px; background:#38bdf8; color:#0f172a; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Chatga o'tish</button>
+                </div>
+               <div class="card" style="cursor: pointer; background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+    <h3>💎 Donat Xizmatlari</h3>
+    <p>PUBG, Free Fire, Mobile Legends va boshqalar</p>
+    <a href="donate.html" style="display: inline-block; padding: 10px 20px; background-color: #38bdf8; border-radius: 6px; font-weight: bold; margin-top: 10px; color: #0f172a; text-decoration: none;">O'tish</a>
+</div>
+            </div>
+        </div>
+
+        <div id="section-topup" class="page-section">
+            <div class="container" style="max-width: 450px; margin: 20px auto; text-align: left;">
+                <h3 style="color: #f59e0b; margin-bottom: 15px; text-align: center;">💳 Balansni Boshqarish (Admin)</h3>
+                <p style="text-align: center; margin-bottom: 20px;">Foydalanuvchining karta raqamini kiriting va summani yozing. (Masalan: <b>+10000</b> yoki <b>-5000</b>)</p>
+                
+                <label style="color: #94a3b8; font-size: 13px;">Karta raqami (16 xonali):</label>
+                <input type="text" id="topupCardInput" class="input-group" placeholder="16 xonali karta raqami" oninput="limitCardInput(this)">
+                
+                <label style="color: #94a3b8; font-size: 13px;">Summa (+ yoki - bilan):</label>
+                <input type="text" id="topupAmountInput" class="input-group" placeholder="Masalan: +10000 yoki -5000">
+                
+                <button onclick="ownerManageBalance()" style="background-color: #f59e0b; color: #0f172a; width: 100%; padding: 12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Bajarish</button>
+            </div>
+        </div>
+
+        <div id="section-chat" class="page-section">
+            <div class="chat-layout">
+                <div class="chat-sidebar" id="chatSidebar" style="display: none;">
+                    <div class="chat-sidebar-title">Foydalanuvchilar (ID)</div>
+                    <div id="chatUserList"></div>
+                </div>
+                <div class="chat-main-area">
+                    <div class="chat-header-panel">
+                        <span id="chatHeaderTitle" style="font-size: 14px; font-weight: bold; color: #38bdf8;">Owner (#0712) bilan muloqot</span>
+                        <div style="display: flex; gap: 5px;">
+                            <button id="ownerGrantBtn" style="display: none; background: #f59e0b; color: #0f172a; border: none; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;" onclick="toggleUserPhotoPermission()">📸 Rasm yoqish</button>
+                            <button id="ownerFinishChatBtn" style="display: none; background: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;" onclick="finishChatAndClear()">🗑️ Keyingi savdoga (Tozalash)</button>
+                        </div>
+                    </div>
+                    <div class="chat-box" id="chatMessages"></div>
+                    
+                    <div class="photo-btn-panel" id="userPhotoPanel">
+                        <button class="btn-send-photo" onclick="document.getElementById('hiddenPhotoInput').click()">📸 Akkaunt rasmini yuborish uchun ustiga bosing (Maks: 10 ta)</button>
+                        <input type="file" id="hiddenPhotoInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(this)">
+                    </div>
+
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="Xabar yozing..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button onclick="sendMessage()">Yuborish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-profile" class="page-section">
+            <div class="profile-card">
+                <h3 style="color: #38bdf8; margin-bottom: 15px;">Foydalanuvchi Kartasi</h3>
+                <div class="profile-body">
+                    <p>Email: <span id="p-email">Yuklanmoqda...</span></p>
+                    <p>ID Raqam: <span id="p-id">Yuklanmoqda...</span></p>
+                    <p>Karta Raqami: <span id="p-card" style="color: #38bdf8; letter-spacing: 1px;">Yuklanmoqda...</span></p>
+                    <p>Balans: <span id="p-balance">0 so'm</span></p>
+                </div>
+                <button class="btn-custom-card" onclick="openCustomCardModal()">✨ Istalgan maxsus karta olish (25,000 so'm)</button>
+            </div>
+            <div style="background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; text-align: center;">
+                <h3>Chiqish</h3>
+                <button onclick="logout()" style="margin-top: 10px; padding: 10px 20px; background: #ef4444; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Tizimdan chiqish</button>
+            </div>
+        </div>
+
+        <div id="cardModal">
+            <div class="modal-content">
+                <h3 style="color: #38bdf8; margin-bottom: 15px;">Maxsus Karta Raqami</h3>
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">O'zingiz xohlagan 16 xonali raqamni kiriting (masalan: 7777777777777777). Birov band qilgan bo'lsa berilmaydi:</p>
+                <input type="text" id="customCardInput" class="modal-input" placeholder="16 xonali istalgan raqam" oninput="limitCardInput(this)">
+                <button onclick="saveCustomCard()" style="width:100%; padding:10px; background:#38bdf8; color:#0f172a; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-bottom:10px;">Sotib olish (25,000 so'm)</button>
+                <button onclick="closeCustomCardModal()" style="width:100%; padding:10px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer;">Bekor qilish</button>
+            </div>
+        </div>
+
+        <div class="nav-bar" id="bottomNav">
+            <a onclick="switchTab('home')" class="nav-item active" id="nav-home">🏠 Asosiy</a>
+            <a onclick="switchTab('topup')" class="nav-item" id="nav-topup" style="display: none; color: #f59e0b;">💳 To'ldirish</a>
+            <a onclick="switchTab('chat')" class="nav-item" id="nav-chat">💬 Chat</a>
+            <a onclick="switchTab('profile')" class="nav-item" id="nav-profile">👤 Profil</a>
+        </div>
+    </div>
+
+    <script>
+        const OWNER_EMAIL = "owner@gamemarket.uz";
+        const OWNER_PASS = "07120712";
+        let activeChatUserId = "";
+
+        function getAllUsers() { return JSON.parse(localStorage.getItem('allUsers')) || []; }
+        function getMessages() { return JSON.parse(localStorage.getItem('chatMessages')) || []; }
+        function getAllSystemCards() { return JSON.parse(localStorage.getItem('allSystemCards')) || {}; }
+
+        function limitCardInput(el) {
+            let val = el.value.replace(/[^0-9]/g, '');
+            if (val.length > 16) { val = val.substring(0, 16); }
+            el.value = val;
+        }
+
+        window.onload = function() {
+            let savedUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (savedUser) { 
+                let users = getAllUsers();
+                let latestUser = users.find(u => u.email === savedUser.email);
+                if (latestUser) {
+                    savedUser = latestUser;
+                    localStorage.setItem('currentUser', JSON.stringify(savedUser));
+                }
+                showApp(savedUser); 
+            }
+        };
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            let users = getAllUsers();
+            let allCards = getAllSystemCards();
+            let currentUser = users.find(u => u.email === email);
+
+            if (email === OWNER_EMAIL && password === OWNER_PASS) {
+                if (!currentUser) {
+                    let card = generateUniqueRandomCard(users, allCards);
+                    currentUser = { id: "0712", email: email, balance: 0, cardNumber: card, canSendPhotos: false };
+                    users.push(currentUser);
+                    allCards[card] = currentUser.id;
+                } else { 
+                    currentUser.id = "0712"; 
+                    if (!currentUser.cardNumber || allCards[currentUser.cardNumber] && allCards[currentUser.cardNumber] !== currentUser.id) {
+                        currentUser.cardNumber = generateUniqueRandomCard(users, allCards);
+                        allCards[currentUser.cardNumber] = currentUser.id;
+                    }
+                }
+            } else {
+                if (!currentUser) {
+                    let card = generateUniqueRandomCard(users, allCards);
+                    currentUser = { id: Math.floor(1000 + Math.random() * 9000).toString(), email: email, balance: 0, cardNumber: card, canSendPhotos: false };
+                    users.push(currentUser);
+                    allCards[card] = currentUser.id;
+                } else {
+                    if (!currentUser.cardNumber) {
+                        currentUser.cardNumber = generateUniqueRandomCard(users, allCards);
+                        allCards[currentUser.cardNumber] = currentUser.id;
+                    }
+                }
+            }
+            
+            localStorage.setItem('allUsers', JSON.stringify(users));
+            localStorage.setItem('allSystemCards', JSON.stringify(allCards));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showApp(currentUser);
+        }
+
+        function generateUniqueRandomCard(users, allCards) {
+            let card;
+            do {
+                card = '4400';
+                for (let i = 0; i < 12; i++) {
+                    card += Math.floor(Math.random() * 10);
+                }
+            } while (allCards[card] || users.some(u => u.cardNumber === card));
+            allCards[card] = true;
+            return card;
+        }
+
+        function showApp(user) {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('bottomNav').style.display = 'flex';
+
+            if (user.id === "0712") {
+                document.getElementById('market-logo').innerText = "GAME MARKET (OWNER)";
+                document.getElementById('market-logo').style.color = "#f59e0b";
+                document.getElementById('chatSidebar').style.display = 'block';
+                document.getElementById('ownerGrantBtn').style.display = 'block';
+                document.getElementById('ownerFinishChatBtn').style.display = 'block';
+                document.getElementById('nav-topup').style.display = 'block';
+                loadOwnerSidebar();
+            } else {
+                document.getElementById('chatSidebar').style.display = 'none';
+                document.getElementById('ownerGrantBtn').style.display = 'none';
+                document.getElementById('ownerFinishChatBtn').style.display = 'none';
+                document.getElementById('nav-topup').style.display = 'none';
+            }
+
+            updateUIUserInfo(user);
+            switchTab('home');
+        }
+
+        function updateUIUserInfo(user) {
+            document.getElementById('display-id').innerText = '#' + user.id;
+            document.getElementById('display-balance').innerText = user.balance.toLocaleString() + " so'm";
+            document.getElementById('p-id').innerText = '#' + user.id;
+            document.getElementById('p-email').innerText = user.email;
+            document.getElementById('p-balance').innerText = user.balance.toLocaleString() + " so'm";
+            document.getElementById('p-card').innerText = user.cardNumber ? user.cardNumber.match(/.{1,4}/g).join(' ') : "---";
+        }
+
+        function logout() { localStorage.removeItem('currentUser'); location.reload(); }
+
+        function switchTab(tabName) {
+            ['home', 'topup', 'chat', 'profile'].forEach(t => {
+                let el = document.getElementById('section-' + t);
+                let nav = document.getElementById('nav-' + t);
+                if(el) el.classList.toggle('active', t === tabName);
+                if(nav) nav.classList.toggle('active', t === tabName);
+            });
+            if (tabName === 'chat') loadMessages();
+        }
+
+        function loadOwnerSidebar() {
+            let users = getAllUsers().filter(u => u.id !== "0712");
+            let sidebarList = document.getElementById('chatUserList');
+            sidebarList.innerHTML = users.length ? "" : `<div style="padding:10px; color:#94a3b8; font-size:12px;">Hozircha userlar yo'q</div>`;
+            
+            users.forEach(u => {
+                let div = document.createElement('div');
+                div.className = `user-list-item ${u.id === activeChatUserId ? 'active' : ''}`;
+                div.innerText = `User #${u.id}`;
+                div.onclick = () => {
+                    activeChatUserId = u.id;
+                    document.getElementById('chatHeaderTitle').innerText = `User #${u.id} bilan muloqot`;
+                    updateOwnerGrantBtnText();
+                    loadOwnerSidebar();
+                    loadMessages();
+                };
+                sidebarList.appendChild(div);
+            });
+
+            if (users.length > 0 && (!activeChatUserId || !users.some(u => u.id === activeChatUserId))) {
+                activeChatUserId = users[0].id;
+                document.getElementById('chatHeaderTitle').innerText = `User #${activeChatUserId} bilan muloqot`;
+                loadOwnerSidebar();
+                loadMessages();
+            }
+        }
+
+        function updateOwnerGrantBtnText() {
+            let users = getAllUsers();
+            let targetUser = users.find(u => u.id === activeChatUserId);
+            let btn = document.getElementById('ownerGrantBtn');
+            if (targetUser && targetUser.canSendPhotos) {
+                btn.innerText = "✅ Rasm yoqilgan (O'chirish)";
+                btn.style.background = "#22c55e";
+            } else {
+                btn.innerText = "📸 Rasm yoqish";
+                btn.style.background = "#f59e0b";
+            }
+        }
+
+        function toggleUserPhotoPermission() {
+            let users = getAllUsers();
+            let targetUser = users.find(u => u.id === activeChatUserId);
+            if (!targetUser) return;
+
+            targetUser.canSendPhotos = !targetUser.canSendPhotos;
+            localStorage.setItem('allUsers', JSON.stringify(users));
+            updateOwnerGrantBtnText();
+            alert(targetUser.canSendPhotos ? `User #${targetUser.id} ga rasm yuborish ruxsati berildi!` : `Ruxsat olib tashlandi.`);
+        }
+
+        function finishChatAndClear() {
+            if (!activeChatUserId || activeChatUserId === "0712") {
+                alert("Iltimos, chap tomondan foydalanuvchini tanlang!");
+                return;
+            }
+
+            if (!confirm(`User #${activeChatUserId} bilan suhbat yakunlandimi? Barcha xabarlar o'chiriladi va keyingi savdoga o'tiladi.`)) {
+                return;
+            }
+
+            let messages = getMessages();
+            let filteredMessages = messages.filter(m => m.sender !== activeChatUserId && m.receiver !== activeChatUserId);
+            localStorage.setItem('chatMessages', JSON.stringify(filteredMessages));
+
+            let users = getAllUsers();
+            let targetUser = users.find(u => u.id === activeChatUserId);
+            if (targetUser) {
+                targetUser.canSendPhotos = false;
+                localStorage.setItem('allUsers', JSON.stringify(users));
+            }
+
+            loadMessages();
+            alert("Suhbat muvaffaqiyatli yakunlandi va chat tozalandi!");
+        }
+
+        function ownerManageBalance() {
+            let cardNum = document.getElementById('topupCardInput').value.trim();
+            let rawAmountStr = document.getElementById('topupAmountInput').value.trim();
+
+            if (cardNum.length !== 16) {
+                alert("Karta raqami aniq 16 ta raqamdan iborat bo'lishi kerak!");
+                return;
+            }
+
+            let users = getAllUsers();
+            let targetUser = users.find(u => u.cardNumber === cardNum);
+
+            if (!targetUser) {
+                alert("Bu karta raqamiga ega foydalanuvchi topilmadi!");
+                return;
+            }
+
+            let firstChar = rawAmountStr.charAt(0);
+            let amountVal = parseFloat(rawAmountStr.replace(/[^0-9.-]+/g, ""));
+
+            if (isNaN(amountVal)) {
+                alert("Iltimos, summani to'g'ri kiriting (+10000 yoki -5000 shaklida)!");
+                return;
+            }
+
+            let changeAmount = 0;
+            let actionText = "";
+
+            if (firstChar === '-') {
+                changeAmount = -Math.abs(amountVal);
+                targetUser.balance += changeAmount;
+                if (targetUser.balance < 0) targetUser.balance = 0;
+                actionText = `${Math.abs(changeAmount).toLocaleString()} so'm yechib olindi`;
+            } else {
+                changeAmount = Math.abs(amountVal);
+                targetUser.balance += changeAmount;
+                actionText = `${changeAmount.toLocaleString()} so'm qo'shildi`;
+            }
+
+            users = users.map(u => u.email === targetUser.email ? targetUser : u);
+            localStorage.setItem('allUsers', JSON.stringify(users));
+
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && currentUser.email === targetUser.email) {
+                currentUser.balance = targetUser.balance;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUIUserInfo(currentUser);
+            }
+
+            if (targetUser.id !== "0712") {
+                let messages = getMessages();
+                messages.push({
+                    sender: "0712",
+                    receiver: targetUser.id,
+                    text: `Owner balansingizni o'zgartirdi: ${actionText}! Joriy balans: ${targetUser.balance.toLocaleString()} so'm`,
+                    type: 'text',
+                    time: new Date().toLocaleTimeString()
+                });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+            }
+
+            alert(`Muvaffaqiyatli! User #${targetUser.id} balansi yangilandi. Joriy balans: ${targetUser.balance.toLocaleString()} so'm`);
+            document.getElementById('topupCardInput').value = '';
+            document.getElementById('topupAmountInput').value = '';
+        }
+
+        function loadMessages() {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let chatBox = document.getElementById('chatMessages');
+            chatBox.innerHTML = "";
+            let messages = getMessages();
+            let targetId = currentUser.id === "0712" ? activeChatUserId : currentUser.id;
+            
+            if (!targetId && currentUser.id === "0712") {
+                chatBox.innerHTML = `<div style="color: #94a3b8; font-size: 13px; text-align:center; margin-top:20px;">Foydalanuvchini tanlang</div>`;
+                return;
+            }
+
+            let filteredMsgs = messages.filter(m => m.sender === targetId || m.receiver === targetId);
+
+            let photoPanel = document.getElementById('userPhotoPanel');
+            let finishBtn = document.getElementById('ownerFinishChatBtn');
+            
+            if (currentUser.id !== "0712") {
+                photoPanel.style.display = currentUser.canSendPhotos ? 'block' : 'none';
+                if(finishBtn) finishBtn.style.display = 'none';
+            } else {
+                photoPanel.style.display = 'none';
+                if(finishBtn) finishBtn.style.display = 'block';
+                updateOwnerGrantBtnText();
+            }
+
+            if (filteredMsgs.length === 0) {
+                chatBox.innerHTML = `<div style="color: #94a3b8; font-size: 13px; text-align:center; margin-top:20px;">Hozircha xabarlar yo'q. Suhbatni boshlang!</div>`;
+                return;
+            }
+
+            filteredMsgs.forEach(m => {
+                let msgDiv = document.createElement('div');
+                msgDiv.className = `msg ${m.sender === currentUser.id ? 'sent' : 'received'}`;
+                
+                if (m.type === 'image') {
+                    msgDiv.innerHTML = `<img src="${m.text}" alt="Akk rasm">`;
+                } else {
+                    msgDiv.innerText = m.text;
+                }
+                chatBox.appendChild(msgDiv);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            let receiverId = currentUser.id === "0712" ? activeChatUserId : "0712";
+            if (!receiverId) {
+                alert("Xabar yuborish uchun foydalanuvchi tanlanmagan!");
+                return;
+            }
+
+            let messages = getMessages();
+            messages.push({ sender: currentUser.id, receiver: receiverId, text: text, type: 'text', time: new Date().toLocaleTimeString() });
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+            input.value = '';
+            loadMessages();
+
+            if (currentUser.id !== "0712") {
+                setTimeout(() => {
+                    let freshMsgs = getMessages();
+                    freshMsgs.push({ 
+                        sender: "0712", 
+                        receiver: currentUser.id, 
+                        text: "Assalomu aleykum xush kelibsiz Game Market ga akkaunt sotmoqchi bo'lsangiz iltimos sabr qiling Owner bir o'zi ishlaydi o'zi siz bilan bog'lanadi!", 
+                        type: 'text', 
+                        time: new Date().toLocaleTimeString() 
+                    });
+                    localStorage.setItem('chatMessages', JSON.stringify(freshMsgs));
+                    if (document.getElementById('section-chat').classList.contains('active')) {
+                        loadMessages();
+                    }
+                }, 1000);
+            }
+        }
+
+        function handlePhotoUpload(input) {
+            let files = input.files;
+            if (!files || files.length === 0) return;
+
+            if (files.length > 10) {
+                alert("Maksimal 10 tagacha rasm tanlashingiz mumkin!");
+                return;
+            }
+
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let users = getAllUsers();
+            let messages = getMessages();
+            let receiverId = "0712";
+
+            let processedCount = 0;
+            for (let i = 0; i < files.length; i++) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    messages.push({
+                        sender: currentUser.id,
+                        receiver: receiverId,
+                        text: e.target.result,
+                        type: 'image',
+                        time: new Date().toLocaleTimeString()
+                    });
+                    processedCount++;
+
+                    if (processedCount === files.length) {
+                        currentUser.canSendPhotos = false;
+                        users = users.map(u => u.email === currentUser.email ? currentUser : u);
+                        
+                        localStorage.setItem('allUsers', JSON.stringify(users));
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+                        input.value = "";
+                        loadMessages();
+                        alert("Rasmlar muvaffaqiyatli yuborildi va ruxsat yopildi!");
+                    }
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        }
+
+        function openCustomCardModal() { document.getElementById('cardModal').style.display = 'flex'; }
+        function closeCustomCardModal() { document.getElementById('cardModal').style.display = 'none'; }
+
+        function saveCustomCard() {
+            let savedUser = JSON.parse(localStorage.getItem('currentUser'));
+            let users = getAllUsers();
+            let allCards = getAllSystemCards();
+            const newCard = document.getElementById('customCardInput').value.trim();
+            
+            if (newCard.length !== 16) { 
+                alert("Karta raqami aniq 16 ta raqamdan iborat bo'lishi kerak!"); 
+                return; 
+            }
+            
+            if (allCards[newCard] || users.some(u => u.cardNumber === newCard)) { 
+                alert("Kechirasiz, bu karta raqami boshqa foydalanuvchi tomonidan band qilingan! Uni sotib olib bo'lmaydi."); 
+                return; 
+            }
+
+            if (savedUser.balance < 25000) { 
+                alert("Balansingizda mablag' yetarli emas! Maxsus karta narxi 25,000 so'm."); 
+                return; 
+            }
+
+            delete allCards[savedUser.cardNumber];
+
+            savedUser.balance -= 25000;
+            savedUser.cardNumber = newCard;
+            allCards[newCard] = savedUser.id;
+
+            users = users.map(u => u.email === savedUser.email ? savedUser : u);
+
+            localStorage.setItem('allUsers', JSON.stringify(users));
+            localStorage.setItem('allSystemCards', JSON.stringify(allCards));
+            localStorage.setItem('currentUser', JSON.stringify(savedUser));
+            
+            alert("Tabriklaymiz! Maxsus karta raqami muvaffaqiyatli xarid qilindi va o'rnatildi (-25,000 so'm)!");
+            closeCustomCardModal();
+            location.reload();
+        }
+    </script>
+</body>
+</html>

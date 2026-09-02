@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garant Market - Game Store</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #ffffff; padding: 20px; padding-bottom: 90px; }
+        
+        /* Header & Navigation */
+        .market-header { display: flex; justify-content: space-between; align-items: center; background-color: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .back-btn { background: #334155; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
+        .back-btn:hover { background: #475569; }
+        .search-bar { width: 100%; max-width: 350px; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; font-size: 14px; }
+        
+        /* Uzum / Alibaba Grid Cards Style */
+        .section-title { font-size: 18px; font-weight: bold; color: #38bdf8; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .listing-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; display: flex; flex-direction: column; position: relative; }
+        .listing-card:hover { transform: translateY(-4px); border-color: #38bdf8; }
+        .listing-img-box { width: 100%; height: 150px; background: #0f172a; position: relative; overflow: hidden; }
+        .listing-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .listing-body { padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .listing-title { font-size: 15px; font-weight: bold; color: #38bdf8; margin-bottom: 4px; }
+        .listing-details { font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
+        .listing-price { font-size: 16px; font-weight: bold; color: #f59e0b; }
+        .delete-card-btn { position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.9); color: white; border: none; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; z-index: 10; }
+        .delete-card-btn:hover { background: #dc2626; }
+
+        /* Owner Add Form Box */
+        .owner-form-box { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 25px; max-width: 600px; margin: 0 auto 30px auto; }
+        .owner-form-box h3 { color: #f59e0b; margin-bottom: 15px; }
+        .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+        .btn-action { width: 100%; padding: 12px; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .btn-action:hover { background: #0ea5e9; }
+
+        /* Detail Modal & Gallery */
+        #listingModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; padding: 20px; overflow-y: auto; }
+        .modal-container { background: #1e293b; border: 1px solid #334155; border-radius: 16px; width: 100%; max-width: 550px; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        .main-preview-img { width: 100%; height: 260px; background: #0f172a; border-radius: 8px; overflow: hidden; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .main-preview-img img { width: 100%; height: 100%; object-fit: contain; }
+        .thumbnail-row { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        .thumb-img { width: 55px; height: 55px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+        .thumb-img.active { border-color: #38bdf8; }
+        .modal-info-p { font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+        .modal-info-p span { color: #fff; font-weight: bold; }
+        .secret-box { background: #0f172a; border: 1px dashed #f59e0b; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; }
+
+        /* Fullscreen Image Viewer */
+        #fullscreenModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div class="market-header">
+        <a href="index.html" class="back-btn">⬅ Orqaga</a>
+        <input type="text" id="marketSearch" class="search-bar" placeholder="O'yin nomi, lvl yoki skin bo'yicha qidirish..." oninput="filterListings()">
+        <div id="userBalanceDisplay" style="font-weight: bold; color: #f59e0b;">Balans: 0 so'm</div>
+    </div>
+
+    <!-- OWNER UCHUN: Akkaunt sotish (E'lon kiritish paneli) -->
+    <div id="ownerAddSection" class="owner-form-box" style="display: none;">
+        <h3>➕ Owner: Akkaunt Sotish (E'lon Qo'shish)</h3>
+        <input type="text" id="accGame" class="form-control" placeholder="O'yin nomi (Masalan: PUBG Mobile / Free Fire)">
+        <input type="text" id="accLvl" class="form-control" placeholder="Daraja / Lvl (Masalan: 75-lvl)">
+        <input type="text" id="accClothes" class="form-control" placeholder="Kiyimlar / Skinlar (Masalan: M416 Glacier, Mummies)">
+        <input type="text" id="accPrice" class="form-control" placeholder="Narxi so'mda (Masalan: 150000)">
+        
+        <label style="color:#94a3b8; font-size:13px; display:block; margin-bottom:5px;">Akkount Login va Paroli (Faqat garant orqali sotib olinganda ochiladi):</label>
+        <input type="text" id="accLogin" class="form-control" placeholder="Login (Email / ID)">
+        <input type="text" id="accPassword" class="form-control" placeholder="Parol">
+        
+        <label style="color:#94a3b8; font-size:13px; display:block; margin-bottom:5px;">Akkaunt rasmlari (1 tadan 5-6 tagacha tanlang):</label>
+        <input type="file" id="accPhotosInput" class="form-control" accept="image/*" multiple>
+        
+        <button onclick="ownerPostListing()" class="btn-action">E'lonni Joylash</button>
+    </div>
+
+    <!-- USERLAR UCHUN: Garant Navigatsiyasi / Vitrina -->
+    <div id="userGarantSection">
+        <div class="section-title">
+            <span>🛡️ Garant Tizimi - Mavjud O'yin Akkauntlari</span>
+            <span style="font-size: 13px; color: #94a3b8; font-weight: normal;">Kartochka ustiga bosing</span>
+        </div>
+        <div id="listingsContainer" class="listings-grid">
+            <!-- Dinamik cardlar chiqadi -->
+        </div>
+    </div>
+
+    <!-- To'liq ma'lumot va 5-6 ta rasmli Galereya Modal oynasi -->
+    <div id="listingModal">
+        <div class="modal-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 id="modalAccTitle" style="color: #38bdf8; font-size: 18px;">Akkaunt Tafsilotlari</h3>
+                <button onclick="closeListingModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">✕ Yopish</button>
+            </div>
+            
+            <div class="main-preview-img" onclick="openFullscreen()">
+                <img id="modalMainImg" src="" alt="Asosiy rasm">
+            </div>
+            <div class="thumbnail-row" id="modalThumbRow">
+                <!-- Kichik rasmlar -->
+            </div>
+
+            <div class="modal-info-p">O'yin: <span id="modalGame">---</span></div>
+            <div class="modal-info-p">Daraja (Lvl): <span id="modalLvl">---</span></div>
+            <div class="modal-info-p">Kiyim va Skinlar: <span id="modalClothes">---</span></div>
+            <div class="modal-info-p">Narxi: <span id="modalPrice" style="color:#f59e0b; font-size:16px;">---</span></div>
+
+            <div class="secret-box" id="secretBox">
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 5px;">🔒 Maxfiy Login va Parol:</p>
+                <div id="secretCredentials" style="color: #ef4444; font-weight: bold; font-size: 15px;">Hali sotib olinmagan (Yashirin)</div>
+            </div>
+
+            <!-- Garant orqali sotib olish tugmasi faqat userlar uchun -->
+            <button id="buyGarantBtn" onclick="buyListingWithGarant()" class="btn-action" style="background:#22c55e; color:#fff;">🛡️ Garant orqali sotib olish</button>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Viewer Modal -->
+    <div id="fullscreenModal" onclick="this.style.display='none'">
+        <img id="fullscreenImg" src="" style="max-width:90%; max-height:90%; object-fit:contain;">
+    </div>
+
+    <script>
+        window.onload = function() {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                alert("Iltimos, oldin tizimga kiring!");
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById('userBalanceDisplay').innerText = `Balans: ${currentUser.balance.toLocaleString()} so'm`;
+
+            // Agar kirgan odam Owner (ID: 0712) bo'lsa:
+            if (currentUser.id === "0712") {
+                document.getElementById('ownerAddSection').style.display = 'block'; // E'lon kiritish chiqadi
+            }
+
+            loadListings();
+        };
+
+        function getListings() {
+            return JSON.parse(localStorage.getItem('marketListings')) || [];
+        }
+
+        // Owner e'lon kiritishi
+        function ownerPostListing() {
+            let game = document.getElementById('accGame').value.trim();
+            let lvl = document.getElementById('accLvl').value.trim();
+            let clothes = document.getElementById('accClothes').value.trim();
+            let price = parseFloat(document.getElementById('accPrice').value.trim());
+            let login = document.getElementById('accLogin').value.trim();
+            let password = document.getElementById('accPassword').value.trim();
+            let fileInput = document.getElementById('accPhotosInput');
+
+            if (!game || !lvl || !price || !login || !password) {
+                alert("Iltimos, barcha asosiy maydonlarni to'ldiring!");
+                return;
+            }
+
+            if (fileInput.files.length === 0) {
+                alert("Kamida 1 ta rasm yuklashingiz kerak!");
+                return;
+            }
+
+            if (fileInput.files.length > 6) {
+                alert("Maksimal 6 tagacha rasm yuklash mumkin!");
+                return;
+            }
+
+            let files = fileInput.files;
+            let loadedImages = [];
+            let processed = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    loadedImages.push(e.target.result);
+                    processed++;
+
+                    if (processed === files.length) {
+                        let listings = getListings();
+                        let newListing = {
+                            id: 'acc_' + Date.now(),
+                            game: game,
+                            lvl: lvl,
+                            clothes: clothes || "Ko'rsatilmagan",
+                            price: price,
+                            login: login,
+                            password: password,
+                            images: loadedImages,
+                            isSold: false
+                        };
+
+                        listings.unshift(newListing);
+                        localStorage.setItem('marketListings', JSON.stringify(listings));
+                        alert("Akkaunt e'loni muvaffaqiyatli joylandi!");
+                        
+                        // Formani tozalash
+                        document.getElementById('accGame').value = '';
+                        document.getElementById('accLvl').value = '';
+                        document.getElementById('accClothes').value = '';
+                        document.getElementById('accPrice').value = '';
+                        document.getElementById('accLogin').value = '';
+                        document.getElementById('accPassword').value = '';
+                        fileInput.value = '';
+
+                        loadListings();
+                    }
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        }
+
+        // E'lonlarni chiqarish (Alibaba / Uzum uslubi kartochkalar)
+        function loadListings(filterQuery = "") {
+            let container = document.getElementById('listingsContainer');
+            let listings = getListings();
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            container.innerHTML = "";
+
+            // Faqat sotilmagan e'lonlar ko'rsatiladi
+            let activeListings = listings.filter(item => !item.isSold);
+
+            let filtered = activeListings.filter(item => {
+                let q = filterQuery.toLowerCase();
+                return item.game.toLowerCase().includes(q) || 
+                       item.lvl.toLowerCase().includes(q) || 
+                       item.clothes.toLowerCase().includes(q);
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 30px;">Hozircha sotuvdagi akkauntlar mavjud emas.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let card = document.createElement('div');
+                card.className = 'listing-card';
+                card.onclick = () => openListingModal(item.id);
+
+                let firstImg = item.images && item.images.length > 0 ? item.images[0] : '';
+
+                let deleteBtnHtml = "";
+                // Agar owner bo'lsa, kartochka ustida o'chirish tugmasi chiqadi
+                if (currentUser && currentUser.id === "0712") {
+                    deleteBtnHtml = `<button class="delete-card-btn" onclick="deleteListing(event, '${item.id}')">🗑 O'chirish</button>`;
+                }
+
+                card.innerHTML = `
+                    ${deleteBtnHtml}
+                    <div class="listing-img-box">
+                        <img src="${firstImg}" alt="Akkaunt">
+                    </div>
+                    <div class="listing-body">
+                        <div>
+                            <div class="listing-title">${item.game}</div>
+                            <div class="listing-details">Lvl: ${item.lvl}</div>
+                            <div class="listing-details" style="font-size:12px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Skin: ${item.clothes}</div>
+                        </div>
+                        <div class="listing-price">${item.price.toLocaleString()} so'm</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterListings() {
+            let q = document.getElementById('marketSearch').value.trim();
+            loadListings(q);
+        }
+
+        // Owner e'lonni o'chirish funksiyasi
+        function deleteListing(event, id) {
+            event.stopPropagation(); // Modal ochilib ketishining oldini oladi
+            if (!confirm("Haqiqatan ham bu e'lonni o'chirib tashlamoqchimisiz?")) return;
+
+            let listings = getListings();
+            listings = listings.filter(item => item.id !== id);
+            localStorage.setItem('marketListings', JSON.stringify(listings));
+            loadListings();
+        }
+
+        let currentActiveListingId = null;
+        let currentActiveImgSrc = "";
+
+        // Modalni ochish va barcha ma'lumotlarni, 5-6 ta rasmni ko'rsatish
+        function openListingModal(id) {
+            let listings = getListings();
+            let item = listings.find(l => l.id === id);
+            if (!item) return;
+
+            currentActiveListingId = id;
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+            document.getElementById('modalAccTitle').innerText = `${item.game} Akkaunti`;
+            document.getElementById('modalGame').innerText = item.game;
+            document.getElementById('modalLvl').innerText = item.lvl;
+            document.getElementById('modalClothes').innerText = item.clothes;
+            document.getElementById('modalPrice').innerText = item.price.toLocaleString() + " so'm";
+
+            let mainImg = document.getElementById('modalMainImg');
+            let thumbRow = document.getElementById('modalThumbRow');
+            thumbRow.innerHTML = "";
+
+            if (item.images && item.images.length > 0) {
+                currentActiveImgSrc = item.images[0];
+                mainImg.src = currentActiveImgSrc;
+
+                item.images.forEach((imgSrc, idx) => {
+                    let thumb = document.createElement('img');
+                    thumb.src = imgSrc;
+                    thumb.className = `thumb-img ${idx === 0 ? 'active' : ''}`;
+                    thumb.onclick = (e) => {
+                        e.stopPropagation();
+                        currentActiveImgSrc = imgSrc;
+                        mainImg.src = imgSrc;
+                        document.querySelectorAll('.thumb-img').forEach(t => t.classList.remove('active'));
+                        thumb.classList.add('active');
+                    };
+                    thumbRow.appendChild(thumb);
+                });
+            }
+
+            let secretCredentialsDiv = document.getElementById('secretCredentials');
+            let buyBtn = document.getElementById('buyGarantBtn');
+
+            // Owner uchun login-parol ko'rinadi, lekin sotib olish tugmasi yo'q. User uchun esa yashirin bo'ladi.
+            if (currentUser.id === "0712") {
+                secretCredentialsDiv.innerHTML = `Owner ko'rinishi — Login: ${item.login} | Parol: ${item.password}`;
+                secretCredentialsDiv.style.color = "#38bdf8";
+                buyBtn.style.display = 'none';
+            } else {
+                secretCredentialsDiv.innerHTML = `🔒 Garant kafolati ostida (Faqat sotib olgandan keyin ochiladi)`;
+                secretCredentialsDiv.style.color = "#f59e0b";
+                buyBtn.style.display = 'block';
+            }
+
+            document.getElementById('listingModal').style.display = 'flex';
+        }
+
+        function closeListingModal() {
+            document.getElementById('listingModal').style.display = 'none';
+            currentActiveListingId = null;
+        }
+
+        function openFullscreen() {
+            if (currentActiveImgSrc) {
+                document.getElementById('fullscreenImg').src = currentActiveImgSrc;
+                document.getElementById('fullscreenModal').style.display = 'flex';
+            }
+        }
+
+        // Garant orqali sotib olish va backend vazifasini bajarish
+        function buyListingWithGarant() {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let listings = getListings();
+            let item = listings.find(l => l.id === currentActiveListingId);
+
+            if (!item || item.isSold) {
+                alert("Kechirasiz, bu akkaunt allaqachon sotib bo'lingan yoki mavjud emas!");
+                return;
+            }
+
+            if (currentUser.balance < item.price) {
+                alert("Balansingizda mablag' yetarli emas!");
+                return;
+            }
+
+            if (!confirm(`Siz rostdan ham "${item.game}" akkauntini ${item.price.toLocaleString()} so'mga garant orqali sotib olmoqchimisiz?`)) {
+                return;
+            }
+
+            // Balansdan yechish va e'lonni sotilgan qilish
+            currentUser.balance -= item.price;
+            item.isSold = true;
+
+            // Barcha userlar bazasini yangilash
+            let users = JSON.parse(localStorage.getItem('allUsers')) || [];
+            users = users.map(u => u.email === currentUser.email ? currentUser : u);
+            
+            // Ownerga pulni qo'shish
+            let ownerUser = users.find(u => u.id === "0712");
+            if (ownerUser) {
+                ownerUser.balance += item.price;
+            }
+
+            localStorage.setItem('allUsers', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('marketListings', JSON.stringify(listings));
+
+            // Chatga avtomatik bildirishnoma va login-parolni yuborish
+            let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+            messages.push({
+                sender: "0712",
+                receiver: currentUser.id,
+                text: `🛡️ GARANT TIZIMI - XARID TASDIQLANDI!
+Tabriklaymiz! Siz "${item.game}" (${item.lvl}) akkauntini muvaffaqiyatli sotib oldingiz.
+Login: ${item.login}
+Parol: ${item.password}
+Yoqimli o'yin tilaymiz!`,
+                type: 'text',
+                time: new Date().toLocaleTimeString()
+            });
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+            alert("Tabriklaymiz! Xarid muvaffaqiyatli amalga oshirildi. Login va parol chatga yuborildi, e'lon esa vitrinedan avtomatik o'chirildi!");
+            closeListingModal();
+            loadListings();
+        }
+    </script>
+</body>
+</html>
