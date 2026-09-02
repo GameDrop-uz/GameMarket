@@ -11,7 +11,7 @@ bot.start((ctx) => {
                 [
                     { 
                         text: "🚀 Game Market'ni Ochish", 
-                        web_app: { url: "[https://inquisitive-souffle-12e6b4.netlify.app](https://inquisitive-souffle-12e6b4.netlify.app)" } // Masalan: Vercel yoki Netlify'dagi link
+                       web_app: { url: "https://inquisitive-souffle-12e6b4.netlify.app" }
                     }
                 ]
             ]
